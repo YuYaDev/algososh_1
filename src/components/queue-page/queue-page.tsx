@@ -8,6 +8,7 @@ import {Queue} from "./queue-page.utils";
 import {ElementStates} from "../../types/element-states";
 import {SHORT_DELAY_IN_MS} from "../../constants/delays";
 import {setDelay} from "../../utils/utils";
+import {ButtonState} from "../../types/buttonState";
 
 type TQueueItem = {
     value?: string;
@@ -22,6 +23,11 @@ export const QueuePage: React.FC = () => {
     const [queueArr, setQueueArr] = useState<TQueueItem[]>(emptyQueue);
     const [disableButtons, setDisableButtons] = useState(false);
 
+    const [loader, setLoader] = useState<ButtonState>({
+        buttonAdd: false,
+        buttonDelete: false,
+        buttonReset: false
+    });
     const onChange = (e: ChangeEvent<HTMLInputElement>) => {
         setInputValue(e.target.value);
     };
@@ -30,6 +36,7 @@ export const QueuePage: React.FC = () => {
 
     const handeAddButton = async () => {
         if (inputValue) {
+            setLoader({ ...loader, buttonAdd: true });
             setInputValue('');
             queue.enqueue({value: inputValue, color: ElementStates.Default});
             setQueue(queue);
@@ -40,10 +47,12 @@ export const QueuePage: React.FC = () => {
             setQueueArr([...queueArr]);
             queueArr[queue.getTail() - 1] = {value: inputValue, color: ElementStates.Default};
             setQueueArr([...queueArr]);
+            setLoader({ ...loader, buttonAdd: false });
         }
     };
 
     const handeDeleteButton = async () => {
+        setLoader({ ...loader, buttonDelete: true });
         setDisableButtons(true);
         queue.dequeue();
         setQueue(queue);
@@ -57,12 +66,15 @@ export const QueuePage: React.FC = () => {
             setQueueArr([...queueArr]);
         }
         setDisableButtons(false);
+        setLoader({ ...loader, buttonDelete: false });
     };
 
     const handleRemoveButton = () => {
+        setLoader({ ...loader, buttonReset: true })
         queue.clear()
         setQueue(queue);
         setQueueArr(Array.from({length: 7}, () => ({value: '', color: ElementStates.Default})));
+        setLoader({ ...loader, buttonReset: false })
     };
 
     return (
@@ -74,17 +86,17 @@ export const QueuePage: React.FC = () => {
                             <Input maxLength={4} isLimitText={true} type="text" onChange={onChange} value={inputValue}/>
                         </div>
                         <div className={queuePageStyles.addButton}>
-                            <Button text="Добавить" data-testid='addBtn' disabled={inputValue === '' || disableButtons}
+                            <Button text="Добавить" data-testid='addBtn' disabled={inputValue === '' || disableButtons}  isLoader={loader.buttonAdd}
                                     onClick={handeAddButton}/>
                         </div>
                         <div className={queuePageStyles.deleteButton}>
-                            <Button text="Удалить" data-testid='deleteBtn' disabled={queue.isEmpty() || disableButtons}
+                            <Button text="Удалить" data-testid='deleteBtn' disabled={queue.isEmpty() || disableButtons} isLoader={loader.buttonDelete}
                                     onClick={handeDeleteButton}/>
                         </div>
                     </section>
                     <div className={queuePageStyles.button}>
                         <Button text="Очистить" data-testid='removeBtn'
-                                disabled={(!queue.getHead() && !queue.getTail()) || disableButtons}
+                                disabled={(!queue.getHead() && !queue.getTail()) || disableButtons}  isLoader={loader.buttonReset}
                                 onClick={handleRemoveButton}/>
                     </div>
                 </div>

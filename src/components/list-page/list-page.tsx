@@ -212,6 +212,11 @@ export const ListPage: React.FC = () => {
         }
     };
 
+    const stateAddButton = !inputValue || loading || list.listLength >= 6;
+    const stateDeleteButton = !list.listLength || loading;
+    const stateButtonInsertAt = !inputValue || !ind || loading || +ind < 0 || +ind > list.listLength - 1 || list.listLength >= 6;
+    const stateButtonDeleteAt = !list.listLength || !ind || loading || +ind < 0 || +ind > list.listLength - 1;
+
     return (
         <SolutionLayout title="Связный список">
             <div className={listPageStyles.mainContainer}>
@@ -230,7 +235,7 @@ export const ListPage: React.FC = () => {
                                 text="Добавить в head"
                                 onClick={addIntoHead}
                                 isLoader={buttonName === ButtonName.AddToHead && loading}
-                                disabled={inputValue === '' || loading}
+                                disabled={stateAddButton}
                                 data-testid='addIntoHead'/>
                         </div>
                         <div className={listPageStyles.button}>
@@ -238,7 +243,7 @@ export const ListPage: React.FC = () => {
                                 text="Добавить в tail"
                                 onClick={addIntoTail}
                                 isLoader={buttonName === ButtonName.AddToTail && loading}
-                                disabled={inputValue === '' || loading}
+                                disabled={stateAddButton}
                                 data-testid='addIntoTail'/>
                         </div>
                         <div className={listPageStyles.button}>
@@ -246,7 +251,7 @@ export const ListPage: React.FC = () => {
                                 text="Удалить из head"
                                 onClick={deleteFromTheHead}
                                 isLoader={buttonName === ButtonName.DeleteFromTheHead && loading}
-                                disabled={loading}
+                                disabled={stateDeleteButton}
                                 data-testid='deleteFromTheHead'/>
                         </div>
                         <div className={listPageStyles.button}>
@@ -254,7 +259,7 @@ export const ListPage: React.FC = () => {
                                 text="Удалить из tail"
                                 onClick={deleteFromTheTail}
                                 isLoader={buttonName === ButtonName.DeleteFromTheTail && loading}
-                                disabled={loading}
+                                disabled={stateDeleteButton}
                                 data-testid='deleteFromTheTail'/>
                         </div>
                     </section>
@@ -275,14 +280,14 @@ export const ListPage: React.FC = () => {
                             text="Добавить по индексу"
                             onClick={addByIndex}
                             isLoader={buttonName === ButtonName.AddByIndex && loading}
-                            disabled={!inputValue || !ind || loading}
+                            disabled={stateButtonInsertAt}
                             data-testid='addByIndex'
                         />
                         <Button
                             text="Удалить по индексу"
                             onClick={deleteByIndex}
                             isLoader={buttonName === ButtonName.DeleteByIndex && loading}
-                            disabled={ind === '' || loading}
+                            disabled={stateButtonDeleteAt}
                             data-testid='deleteByIndex'
                         />
                     </section>

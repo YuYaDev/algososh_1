@@ -8,6 +8,7 @@ import stackPageStyles from './stack-page.module.css';
 import {SHORT_DELAY_IN_MS} from '../../constants/delays';
 import {Stack} from "./stack-page.utils";
 import {setDelay} from "../../utils/utils";
+import {ButtonState} from "../../types/buttonState";
 
 type TStackItem = {
     value: string;
@@ -18,6 +19,12 @@ export const StackPage: React.FC = () => {
     const [stackArr, setStackArr] = useState<TStackItem[]>([]);
     const [inputValue, setInputValue] = useState('');
 
+    const [loader, setLoader] = useState<ButtonState>({
+        buttonAdd: false,
+        buttonDelete: false,
+        buttonReset: false
+    });
+
     const [stack] = useState(new Stack<TStackItem>());
 
     const onChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -26,26 +33,32 @@ export const StackPage: React.FC = () => {
 
     const handleAddButton = async () => {
         if (inputValue) {
+            setLoader({ ...loader, buttonAdd: true });
             stack.push({value: inputValue, color: ElementStates.Changing});
             setInputValue('');
             setStackArr([...stack.getElements()]);
             await setDelay(SHORT_DELAY_IN_MS);
             stack.peek.color = ElementStates.Default;
             setStackArr([...stack.getElements()]);
+            setLoader({ ...loader, buttonAdd: false });
         }
     };
 
     const handleDeleteButton = async () => {
+        setLoader({ ...loader, buttonDelete: true });
         stack.peek.color = ElementStates.Changing;
         setStackArr([...stack.getElements()]);
         await setDelay(SHORT_DELAY_IN_MS);
         stack.pop();
         setStackArr([...stack.getElements()]);
+        setLoader({ ...loader, buttonDelete: false });
     };
 
     const handleRemoveAllButton = () => {
+        setLoader({ ...loader, buttonReset: true })
         stack.clear()
         setStackArr([...stack.getElements()]);
+        setLoader({ ...loader, buttonReset: false })
     };
 
     const givePosition = (index: number, arr: TStackItem[]): string => {
@@ -65,16 +78,16 @@ export const StackPage: React.FC = () => {
                             <Input maxLength={4} isLimitText={true} type="text" value={inputValue} onChange={onChange}/>
                         </div>
                         <div className={stackPageStyles.addButton}>
-                            <Button text="Добавить" data-testid='addBtn' onClick={handleAddButton}
+                            <Button text="Добавить" data-testid='addBtn' onClick={handleAddButton}  isLoader={loader.buttonAdd}
                                     disabled={inputValue === ''}/>
                         </div>
                         <div className={stackPageStyles.deleteButton}>
-                            <Button text="Удалить" data-testid='deleteBtn' onClick={handleDeleteButton}
+                            <Button text="Удалить" data-testid='deleteBtn' onClick={handleDeleteButton} isLoader={loader.buttonDelete}
                                     disabled={!stackArr.length}/>
                         </div>
                     </section>
                     <div className={stackPageStyles.button}>
-                        <Button text="Очистить" data-testid='removeBtn' onClick={handleRemoveAllButton}
+                        <Button text="Очистить" data-testid='removeBtn' onClick={handleRemoveAllButton} isLoader={loader.buttonReset}
                                 disabled={!stackArr.length}/>
                     </div>
                 </div>
